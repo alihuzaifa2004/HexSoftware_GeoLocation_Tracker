@@ -3,18 +3,14 @@ import requests
 import pandas as pd
 import pydeck as pdk
 
-# ---------------------------------------------------
-# PAGE CONFIG
-# ---------------------------------------------------
+
 st.set_page_config(
-    page_title="GeoLocation Tracker",
+    page_title="GeoLocation Tracker ",
     page_icon="🌍",
     layout="wide"
 )
 
-# ---------------------------------------------------
-# CUSTOM CSS (Optimized for Google Maps Aesthetic)
-# ---------------------------------------------------
+
 st.markdown(
     """
     <style>
@@ -77,15 +73,11 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# ---------------------------------------------------
-# TITLE
-# ---------------------------------------------------
+
 st.markdown('<div class="main-title">🌍 GeoLocation Tracker</div>', unsafe_allow_html=True)
 st.markdown('<div class="subtitle">Track IP-based Geolocation with Interactive Maps</div>', unsafe_allow_html=True)
 
-# ---------------------------------------------------
-# FAIL-SAFE MULTI-API LOCATION FETCHER
-# ---------------------------------------------------
+
 def get_location_data():
     headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
     
@@ -148,15 +140,11 @@ def get_location_data():
         
     return None
 
-# ---------------------------------------------------
-# FETCH DATA
-# ---------------------------------------------------
+
 with st.spinner("Fetching geolocation parameters..."):
     data = get_location_data()
 
-# ---------------------------------------------------
-# DISPLAY DATA
-# ---------------------------------------------------
+
 if data:
     ip = data.get("ip", "N/A")
     city = data.get("city", "N/A")
@@ -174,9 +162,7 @@ if data:
     except ValueError:
         latitude, longitude = 0.0, 0.0
 
-    # ---------------------------------------------------
-    # INFO SECTION
-    # ---------------------------------------------------
+
     col1, col2 = st.columns(2)
 
     with col1:
@@ -211,9 +197,7 @@ if data:
             unsafe_allow_html=True
         )
 
-    # ---------------------------------------------------
-    # MAP DATAFRAME CONFIGURATION
-    # ---------------------------------------------------
+
     map_data = pd.DataFrame({
         'lat': [latitude],
         'lon': [longitude],
@@ -221,9 +205,6 @@ if data:
         'ip': [ip]
     })
 
-    # ---------------------------------------------------
-    # GOOGLE MAPS FLOATING CONTROL CARD OVERLAY
-    # ---------------------------------------------------
     st.markdown(
         f"""
         <div class="gmaps-overlay">
@@ -234,17 +215,15 @@ if data:
         unsafe_allow_html=True
     )
 
-    # ---------------------------------------------------
-    # GOOGLE MAPS STYLE ENGINE (OPEN-SOURCE CLOUD STREAM)
-    # ---------------------------------------------------
+
     st.pydeck_chart(
         pdk.Deck(
-            # Replaced closed Mapbox link with an un-gated public map server asset
-            map_style='https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json',
+            # Using Mapbox Streets style layer to duplicate Google Maps' exact colors
+            map_style='mapbox://styles/mapbox/streets-v12',
             initial_view_state=pdk.ViewState(
                 latitude=latitude,
                 longitude=longitude,
-                zoom=14,         # Close-up view to focus on street layouts
+                zoom=14,         # High-resolution close-up view to focus on street layouts
                 pitch=0,         # Flat birds-eye view identical to standard default Google Maps
                 bearing=0,
             ),
@@ -255,7 +234,7 @@ if data:
                         "<b>City:</b> {city}<br/>"
                         "<b>IP Address:</b> {ip}</div>",
                 "style": {
-                    "backgroundColor": "#ea4335", # Google Maps Signature Red
+                    "backgroundColor": "#ea4335", # Google Maps Signature Red Location Marker Pin color
                     "borderRadius": "4px",
                     "border": "1px solid #c5221f"
                 }
@@ -267,16 +246,16 @@ if data:
                     data=map_data,
                     get_position='[lon, lat]',
                     get_color='[26, 115, 232, 230]', # Google Map Pointer Blue Core Glow
-                    get_radius=100,
+                    get_radius=120,
                     pickable=True
                 ),
-                # Layer 2: Soft Blue Outer Ring (GPS location pulsing bubble simulation)
+                # Layer 2: Soft White Outer Ring (Emulating GPS location pulsing bubble)
                 pdk.Layer(
                     'ScatterplotLayer',
                     data=map_data,
                     get_position='[lon, lat]',
                     get_color='[26, 115, 232, 45]', # Translucent perimeter beacon radius
-                    get_radius=300,
+                    get_radius=350,
                     pickable=False
                 )
             ],
@@ -286,8 +265,6 @@ if data:
 else:
     st.error("❌ Failed to Fetch Geolocation Data from all provider streams. Verify internet connection.")
 
-# ---------------------------------------------------
-# FOOTER
-# ---------------------------------------------------
+
 st.markdown("---")
 st.markdown("<center>🚀 Developed By Ali Huzaifa for HexSoftwares Internship Program</center>", unsafe_allow_html=True)
